@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script>
+        var xhr = new XMLHttpRequest();
+        xhr.open('get', 'sandbox.js');
+        xhr.onload = function () {
+            var js = xhr.responseText;
+            var sandboxWindow = {};
+            var proxyWindow = new Proxy(window, {
+                get: function (target, prop) {
+                    return sandboxWindow[prop] || target[prop];
+                },
+                set: function (target, prop, value) {
+                    sandboxWindow[prop] = value;
+                    return true;
+                }
+            });
+            Function('window', "\"use strict\";\n" + js).call(null, proxyWindow);
+
+            try {
+                console.log('out sandbox aaa:', aaa);
+            } catch(e) {}
+            try {
+                console.log('out sandbox bbb:', bbb);
+            } catch(e) {}
+            try {
+                console.log("out sandbox window.abc:", window.abc);
+            } catch(e) {}
+            try {
+                console.log("out sandbox window.xyz:", window.xyz);
+            } catch(e) {}
+        }
+        xhr.send()
+    </script>
+</head>
+
+<body>
+</body>
+
+</html>
